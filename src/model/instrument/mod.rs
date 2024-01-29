@@ -49,6 +49,10 @@ impl Instrument {
             kind,
         }
     }
+
+    pub fn to_inst_id(&self) -> String {
+        format!("{}-{}-{}", self.base, self.quote, self.kind.to_inst_id()).to_uppercase()
+    }
 }
 
 #[cfg(test)]

@@ -1,7 +1,8 @@
 use chrono::{DateTime, Utc};
+use core::fmt;
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
-use std::fmt::{Display, Formatter};
+use std::fmt::{write, Display, Formatter};
 
 /// Defines the type of [`Instrument`](super::Instrument) which is being traded on a
 /// given `base_quote` market.
@@ -12,6 +13,16 @@ pub enum InstrumentKind {
     Future(FutureContract),
     Perpetual,
     Option(OptionContract),
+}
+
+impl InstrumentKind {
+    // ETH-USD-240223-2500-P
+    pub fn to_inst_id(&self) -> String {
+        match self {
+            InstrumentKind::Option(option) => option.to_string(),
+            _ => format!(""),
+        }
+    }
 }
 
 impl Default for InstrumentKind {
@@ -57,6 +68,23 @@ pub struct OptionContract {
     #[serde(with = "chrono::serde::ts_milliseconds")]
     pub expiry: DateTime<Utc>,
     pub strike: Decimal,
+}
+
+impl fmt::Display for OptionContract {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{}{}{}-{}-{}",
+            self.expiry.format("%y").to_string(),
+            self.expiry.format("%m").to_string(),
+            self.expiry.format("%d").to_string(),
+            self.strike,
+            match self.kind {
+                OptionKind::Call => "C",
+                OptionKind::Put => "P",
+            }
+        )
+    }
 }
 
 /// [`OptionContract`] kind - Put or Call.
