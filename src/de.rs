@@ -10,10 +10,16 @@ pub fn de_str<'de, D, T>(deserializer: D) -> Result<T, D::Error>
 where
     D: serde::de::Deserializer<'de>,
     T: std::str::FromStr,
+    T: Default,
     T::Err: std::fmt::Display,
 {
     let data: &str = serde::de::Deserialize::deserialize(deserializer)?;
-    data.parse::<T>().map_err(serde::de::Error::custom)
+    // instead of return error, using default value of T
+    // data.parse::<T>().map_err(serde::de::Error::custom)
+    match data.parse::<T>() {
+        Ok(value) => Ok(value),
+        Err(_) => Ok(T::default()),
+    }
 }
 
 /// Deserialize a `u64` milliseconds value as `DateTime<Utc>`.
