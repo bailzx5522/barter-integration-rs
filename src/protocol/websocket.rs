@@ -45,7 +45,13 @@ impl StreamParser for WebSocketParser {
     {
         match input {
             Ok(ws_message) => match ws_message {
-                WsMessage::Text(text) => process_text(text),
+                WsMessage::Text(text) => {
+                    if text == String::from("pong") {
+                        debug!("return okx pong");
+                        return None;
+                    }
+                    return process_text(text);
+                }
                 WsMessage::Binary(binary) => process_binary(binary),
                 WsMessage::Ping(ping) => process_ping(ping),
                 WsMessage::Pong(pong) => process_pong(pong),
